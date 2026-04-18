@@ -2,7 +2,7 @@
 
 > Interactive 3D model of a third-generation self-inactivating (SIN) lentiviral vector system carrying a 7 kb therapeutic transgene for solid tumor cell & gene therapy manufacturing.
 
-**Live demo:** https://thepearl13.github.io/lentiflux-3d/
+**Live demo:** https://harana-io.github.io/lentiflux-3d/
 
 ![Third-Gen Lentiviral Vector](https://img.shields.io/badge/lentivirus-3rd_gen_SIN-00e5ff) ![Payload](https://img.shields.io/badge/transgene-7.0_kb-ffb14d) ![Stack](https://img.shields.io/badge/stack-three.js-7c5cff)
 
