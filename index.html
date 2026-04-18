@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>LentiFlux / 3GX — Third-Gen Lentiviral Vector · Scientific Edition</title>
+<meta name="description" content="Scientifically rigorous interactive 3D model of a third-generation self-inactivating lentiviral vector carrying a 7 kb therapeutic transgene for solid tumor immunotherapy manufacturing."/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Helvetica Neue',sans-serif;
+    background:#03060e;color:#e8f2ff;-webkit-font-smoothing:antialiased;cursor:default
+  }
+  #canvas{position:fixed;inset:0;width:100vw;height:100vh;z-index:1;display:block}
+  .ui{position:fixed;z-index:10;pointer-events:none}
+  .ui>*{pointer-events:auto}
+
+  .vignette{position:fixed;inset:0;z-index:4;pointer-events:none;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.65) 100%)}
+  .scanlines{position:fixed;inset:0;z-index:5;pointer-events:none;mix-blend-mode:overlay;opacity:0.3;background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(255,255,255,0.04) 2px 3px)}
+  .grain{position:fixed;inset:0;z-index:6;pointer-events:none;opacity:0.035;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/></svg>")}
+
+  .topbar{top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:22px 32px}
+  .brand{display:flex;align-items:center;gap:14px}
+  .brand-mark{width:40px;height:40px;border:1px solid rgba(0,229,255,0.45);border-radius:8px;display:grid;place-items:center;background:rgba(0,229,255,0.06);position:relative;box-shadow:0 0 20px rgba(0,229,255,0.12),inset 0 0 12px rgba(0,229,255,0.08)}
+  .brand-mark::before{content:'';position:absolute;inset:4px;border:1px solid rgba(0,229,255,0.2);border-radius:4px}
+  .brand-name{font-size:13px;font-weight:700;letter-spacing:3.5px;background:linear-gradient(100deg,#00e5ff 0%,#7c5cff 60%,#ff3dc8 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .brand-sub{font-size:9.5px;color:#8aa0c7;letter-spacing:1.8px;text-transform:uppercase;margin-top:2px}
+  .sci-badge{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;margin-left:10px;background:rgba(0,255,157,0.1);border:1px solid rgba(0,255,157,0.35);border-radius:3px;font-size:8.5px;color:#00ff9d;letter-spacing:1.4px;font-weight:700;font-family:'SF Mono',ui-monospace,monospace;vertical-align:middle}
+  .sci-badge::before{content:'';width:5px;height:5px;background:#00ff9d;border-radius:50%;box-shadow:0 0 6px #00ff9d}
+
+  .meta{text-align:right;font-size:10px;color:#8aa0c7;letter-spacing:1.2px;line-height:1.9}
+  .meta-row{display:flex;gap:14px;justify-content:flex-end;font-family:'SF Mono','JetBrains Mono',ui-monospace,monospace}
+  .meta-val{color:#e8f2ff;font-weight:600}
+  .meta-val.accent{color:#00e5ff}
+  .meta-val.amber{color:#ffb14d}
+
+  .info{top:112px;right:32px;width:380px;padding:22px 22px 18px;background:linear-gradient(180deg,rgba(18,28,52,0.78),rgba(10,18,36,0.6));border:1px solid rgba(0,229,255,0.22);border-radius:14px;backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);box-shadow:0 10px 50px rgba(0,0,0,0.55),inset 0 0 0 1px rgba(255,255,255,0.03),0 0 40px rgba(0,229,255,0.05);transition:opacity 260ms ease,transform 260ms ease;max-height:calc(100vh - 180px);overflow-y:auto}
+  .info::-webkit-scrollbar{width:4px}.info::-webkit-scrollbar-track{background:transparent}.info::-webkit-scrollbar-thumb{background:rgba(0,229,255,0.2);border-radius:2px}
+  .info.switching{opacity:0;transform:translateY(-6px)}
+  .info-tag{font-size:10px;letter-spacing:2.4px;color:#00e5ff;font-weight:700;margin-bottom:10px}
+  .info-tag::before{content:'';display:inline-block;width:20px;height:1px;background:#00e5ff;margin-right:10px;transform:translateY(-3px);vertical-align:middle;box-shadow:0 0 8px #00e5ff}
+  .info-title{font-size:21px;font-weight:600;letter-spacing:-0.3px;margin-bottom:14px;color:#fff;line-height:1.2}
+  .info-body{font-size:12.5px;line-height:1.65;color:#b8c6e0;margin-bottom:14px}
+  .info-body em{color:#ffb14d;font-style:normal;font-weight:600}
+  .info-body b{color:#e8f2ff}
+  .info-body code{font-family:'SF Mono',ui-monospace,monospace;font-size:11.5px;background:rgba(0,229,255,0.08);padding:1px 5px;border-radius:3px;color:#00e5ff}
+  .mechanism{font-size:11px;line-height:1.55;color:#8aa0c7;padding:10px 12px;background:rgba(124,92,255,0.06);border-left:2px solid #7c5cff;border-radius:3px;margin-bottom:14px;letter-spacing:0.2px}
+  .mechanism-label{color:#7c5cff;font-weight:700;letter-spacing:1.2px;font-size:9px;text-transform:uppercase;margin-bottom:3px}
+  .spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;border-top:1px solid rgba(0,229,255,0.14);padding-top:14px;margin-bottom:12px}
+  .spec-cell{display:flex;flex-direction:column;gap:3px}
+  .spec-label{color:#8aa0c7;letter-spacing:1.2px;text-transform:uppercase;font-size:9px;font-weight:600}
+  .spec-val{color:#e8f2ff;font-weight:600;font-size:12.5px;font-family:'SF Mono','JetBrains Mono',ui-monospace,monospace;letter-spacing:0.2px}
+  .spec-val.hi{color:#00e5ff}
+  .spec-val.amber{color:#ffb14d}
+  .spec-val.warn{color:#ff6b7a}
+  .spec-val.ok{color:#00ff9d}
+  .citation{font-size:9.5px;color:#6c7d9e;font-style:italic;letter-spacing:0.2px;line-height:1.5;border-top:1px dashed rgba(124,92,255,0.15);padding-top:10px}
+  .citation b{color:#8aa0c7;font-style:normal;font-weight:600}
+
+  .nav{bottom:32px;left:50%;transform:translateX(-50%);display:flex;gap:4px;background:linear-gradient(180deg,rgba(18,28,52,0.78),rgba(10,18,36,0.6));border:1px solid rgba(124,92,255,0.28);padding:6px;border-radius:14px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 10px 50px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.05)}
+  .nav-btn{background:transparent;border:none;color:#8aa0c7;padding:12px 18px;font-size:10px;letter-spacing:1.5px;font-weight:600;cursor:pointer;border-radius:10px;transition:all 220ms cubic-bezier(.2,.8,.2,1);font-family:inherit;position:relative;display:flex;align-items:center;gap:8px}
+  .nav-btn:hover{color:#e8f2ff;background:rgba(0,229,255,0.07)}
+  .nav-btn.active{color:#041118;background:linear-gradient(135deg,#00e5ff 0%,#7c5cff 100%);box-shadow:0 0 24px rgba(0,229,255,0.35),0 0 40px rgba(124,92,255,0.2);text-shadow:0 1px 0 rgba(255,255,255,0.25)}
+  .nav-idx{font-family:'SF Mono',ui-monospace,monospace;font-size:9.5px;opacity:0.6;font-weight:500}
+  .nav-btn.active .nav-idx{opacity:0.85}
+
+  .status{left:32px;bottom:32px;font-size:10px;letter-spacing:1.8px;color:#8aa0c7;line-height:1.9;font-family:'SF Mono',ui-monospace,monospace}
+  .status-dot{display:inline-block;width:6px;height:6px;background:#00ff9d;border-radius:50%;box-shadow:0 0 10px #00ff9d;margin-right:8px;animation:pulse 2s infinite}
+  .status b{color:#e8f2ff;font-weight:600}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.35}}
+
+  .hint{right:32px;bottom:32px;font-size:10px;color:#6c7d9e;letter-spacing:1.2px;text-align:right;line-height:1.9;font-family:'SF Mono',ui-monospace,monospace}
+  .hint kbd{display:inline-block;padding:2px 7px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:4px;color:#b8c6e0;font-family:inherit;font-size:9.5px;margin:0 2px}
+
+  #loader{position:fixed;inset:0;background:#03060e;display:grid;place-items:center;z-index:100;transition:opacity 700ms ease}
+  #loader.hidden{opacity:0;pointer-events:none}
+  .loader-inner{text-align:center}
+  .loader-ring{width:56px;height:56px;margin:0 auto 18px;border:1px solid rgba(0,229,255,0.2);border-top-color:#00e5ff;border-radius:50%;animation:spin 1.1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loader-txt{font-size:11px;letter-spacing:3.5px;color:#8aa0c7}
+  .loader-bar{width:220px;height:1px;background:rgba(0,229,255,0.15);border-radius:2px;overflow:hidden;margin:18px auto 0}
+  .loader-fill{width:40%;height:100%;background:linear-gradient(90deg,transparent,#00e5ff,transparent);animation:load 1.4s ease-in-out infinite}
+  @keyframes load{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}
+
+  @media(max-width:960px){
+    .info{display:none}
+    .topbar{padding:14px 16px}
+    .brand-name{font-size:11px;letter-spacing:2.5px}
+    .nav{bottom:14px;padding:4px}
+    .nav-btn{padding:9px 10px;font-size:9px;letter-spacing:1px}
+    .nav-idx{display:none}
+    .status,.hint{font-size:9px;bottom:62px}
+  }
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-inner">
+    <div class="loader-ring"></div>
+    <div class="loader-txt">INITIALIZING VECTOR MODEL</div>
+    <div class="loader-bar"><div class="loader-fill"></div></div>
+  </div>
+</div>
+
+<canvas id="canvas"></canvas>
+<div class="vignette"></div>
+<div class="scanlines"></div>
+<div class="grain"></div>
+
+<div class="ui topbar">
+  <div class="brand">
+    <div class="brand-mark">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <circle cx="9" cy="9" r="7" stroke="#00e5ff" stroke-width="1"/>
+        <circle cx="9" cy="9" r="3" fill="#00e5ff"/>
+        <circle cx="9" cy="9" r="3" fill="#00e5ff" opacity="0.35"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-name">LENTIFLUX &nbsp;/&nbsp; 3GX <span class="sci-badge">SCI · v2</span></div>
+      <div class="brand-sub">Third-Generation SIN Lentivirus · Solid Tumor CGT Manufacturing</div>
+    </div>
+  </div>
+  <div class="meta">
+    <div class="meta-row"><span>PAYLOAD</span><span class="meta-val accent">7.0 kb</span></div>
+    <div class="meta-row"><span>SOFT LIMIT</span><span class="meta-val">~9.5 kb</span></div>
+    <div class="meta-row"><span>PROMOTER</span><span class="meta-val amber">EF1α / EFS / MNDU3</span></div>
+    <div class="meta-row"><span>ENV</span><span class="meta-val">VSV-G (pan-tropic)</span></div>
+    <div class="meta-row"><span>SAFETY</span><span class="meta-val">4-PLASMID · SIN · Tat-INDEP.</span></div>
+  </div>
+</div>
+
+<div class="ui info" id="info"></div>
+
+<div class="ui status">
+  <span class="status-dot"></span>RENDER · <b>ACTIVE</b><br>
+  <span style="opacity:0.55">SCENE · <b id="scene-name" style="color:#00e5ff">PRODUCER CELL</b></span>
+</div>
+
+<div class="ui hint">
+  <kbd>DRAG</kbd> rotate &nbsp; <kbd>SCROLL</kbd> zoom<br>
+  <span style="opacity:0.55"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd><kbd>5</kbd> switch scene</span>
+</div>
+
+<div class="ui nav" id="nav">
+  <button class="nav-btn active" data-scene="0"><span class="nav-idx">01</span>PRODUCER</button>
+  <button class="nav-btn" data-scene="1"><span class="nav-idx">02</span>PLASMID</button>
+  <button class="nav-btn" data-scene="2"><span class="nav-idx">03</span>CAPACITY</button>
+  <button class="nav-btn" data-scene="3"><span class="nav-idx">04</span>VIRION</button>
+  <button class="nav-btn" data-scene="4"><span class="nav-idx">05</span>LIFECYCLE</button>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const COL = {
+  cyan:0x00e5ff, magenta:0xff3dc8, amber:0xffb14d, violet:0x7c5cff,
+  green:0x00ff9d, red:0xff6b7a, navy:0x0e1a30, pale:0xe8f2ff, dim:0x8aa0c7
+};
+
+/* =========================================================
+   Renderer / Scene / Camera / Post-processing
+========================================================= */
+const canvas = document.getElementById('canvas');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:false});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x03060e, 1);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x03060e, 0.014);
+
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 400);
+camera.position.set(0, 6, 26);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.minDistance = 7; controls.maxDistance = 70;
+controls.autoRotate = true; controls.autoRotateSpeed = 0.3;
+controls.enablePan = false;
+
+scene.add(new THREE.AmbientLight(0x203040, 0.55));
+const lKey = new THREE.DirectionalLight(0x00e5ff, 1.1);  lKey.position.set(12, 14, 10);  scene.add(lKey);
+const lFill = new THREE.DirectionalLight(0xff3dc8, 0.65);lFill.position.set(-12, -4, -8); scene.add(lFill);
+const lRim = new THREE.DirectionalLight(0x7c5cff, 0.5);  lRim.position.set(0, -12, 10);   scene.add(lRim);
+const lTop = new THREE.DirectionalLight(0xffb14d, 0.25); lTop.position.set(0, 20, 0);     scene.add(lTop);
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.75, 0.65, 0.2);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+/* stars */
+const starGeo = new THREE.BufferGeometry();
+const starCount = 1200;
+const sp = new Float32Array(starCount*3), sc = new Float32Array(starCount*3);
+for(let i=0;i<starCount;i++){
+  sp[i*3]=(Math.random()-0.5)*220; sp[i*3+1]=(Math.random()-0.5)*220; sp[i*3+2]=(Math.random()-0.5)*220;
+  const t=Math.random(); sc[i*3]=0.1+t*0.4; sc[i*3+1]=0.5+t*0.4; sc[i*3+2]=1.0;
+}
+starGeo.setAttribute('position', new THREE.BufferAttribute(sp, 3));
+starGeo.setAttribute('color',    new THREE.BufferAttribute(sc, 3));
+const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({size:0.18, vertexColors:true, transparent:true, opacity:0.7, blending:THREE.AdditiveBlending, depthWrite:false}));
+scene.add(stars);
+
+const gridHelper = new THREE.PolarGridHelper(30, 8, 8, 64, 0x1a3358, 0x0a1a30);
+gridHelper.position.y = -11;
+scene.add(gridHelper);
+
+/* =========================================================
+   Helpers
+========================================================= */
+function canvasLabel(text, {color='#e8f2ff', sub='', subColor='#8aa0c7', size=44, width=720, height=200, align='center', weight=700}={}){
+  const c = document.createElement('canvas');
+  c.width = width; c.height = height;
+  const x = c.getContext('2d');
+  x.clearRect(0,0,width,height);
+  x.font = `${weight} ${size}px -apple-system, 'SF Pro Display', 'Inter', sans-serif`;
+  x.textAlign = align; x.textBaseline = 'middle';
+  x.fillStyle = color; x.shadowColor = color; x.shadowBlur = 14;
+  const cx = align==='center' ? width/2 : (align==='left' ? 16 : width-16);
+  const topY = sub ? height/2 - 26 : height/2;
+  x.fillText(text, cx, topY);
+  if(sub){
+    x.shadowBlur = 0; x.font = `500 ${Math.round(size*0.48)}px 'SF Mono', ui-monospace, monospace`;
+    x.fillStyle = subColor; x.fillText(sub, cx, height/2 + 28);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.anisotropy = 4; tex.colorSpace = THREE.SRGBColorSpace;
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({map:tex, transparent:true, depthWrite:false}));
+  s.scale.set(width/200, height/200, 1);
+  return s;
+}
+
+function glowMat(hex, opacity=1, emissive=0.9){
+  return new THREE.MeshStandardMaterial({color:hex, emissive:hex, emissiveIntensity:emissive, metalness:0.3, roughness:0.25, transparent:opacity<1, opacity});
+}
+function glassMat(hex, opacity=0.15){
+  return new THREE.MeshPhysicalMaterial({color:hex, emissive:hex, emissiveIntensity:0.08, transmission:0.85, thickness:1.2, roughness:0.18, metalness:0.05, transparent:true, opacity, ior:1.35, side:THREE.DoubleSide});
+}
+function leaderLine(from, to, color=COL.cyan, opacity=0.55){
+  const pts = [new THREE.Vector3(...from), new THREE.Vector3(...to)];
+  const g = new THREE.BufferGeometry().setFromPoints(pts);
+  return new THREE.Line(g, new THREE.LineBasicMaterial({color, transparent:true, opacity}));
+}
+
+// pseudo-random noise for displacement
+function noise3(x, y, z){
+  return Math.sin(x*0.9)*Math.cos(y*0.7)*0.5 + Math.sin(z*1.1)*0.3 + Math.sin((x+y+z)*0.5)*0.2;
+}
+function pleomorphicSphere(r, amp, detail=64){
+  const g = new THREE.SphereGeometry(r, detail, Math.floor(detail*0.66));
+  const p = g.attributes.position;
+  for(let i=0; i<p.count; i++){
+    const v = new THREE.Vector3().fromBufferAttribute(p, i);
+    const n = amp * noise3(v.x, v.y, v.z);
+    v.multiplyScalar(1 + n);
+    p.setXYZ(i, v.x, v.y, v.z);
+  }
+  g.computeVertexNormals();
+  return g;
+}
+
+/* =========================================================
+   Scene groups
+========================================================= */
+const groups = [new THREE.Group(), new THREE.Group(), new THREE.Group(), new THREE.Group(), new THREE.Group()];
+groups.forEach(g => { g.visible = false; scene.add(g); });
+
+/* ---------- SCENE 0 · PRODUCER CELL ---------- */
+(function buildProducer(){
+  const g = groups[0];
+
+  // Pleomorphic HEK293T
+  const cell = new THREE.Mesh(pleomorphicSphere(5.8, 0.06, 80), glassMat(COL.cyan, 0.1));
+  g.add(cell);
+  const cellWire = new THREE.Mesh(cell.geometry.clone(),
+    new THREE.MeshBasicMaterial({color:COL.cyan, wireframe:true, transparent:true, opacity:0.13}));
+  g.add(cellWire);
+
+  // Nucleus — also pleomorphic, offset
+  const nuc = new THREE.Mesh(pleomorphicSphere(2.4, 0.05, 48), glassMat(COL.violet, 0.28));
+  nuc.position.set(0.4, 0.2, 0); g.add(nuc);
+  const nucCore = new THREE.Mesh(new THREE.SphereGeometry(0.5, 24, 24), glowMat(COL.pale, 1, 2));
+  nucCore.position.copy(nuc.position); g.add(nucCore);
+
+  const cellLab = canvasLabel('HEK293T', {color:'#00e5ff', sub:'PRODUCER CELL · TRANSIENT TRANSFECTION', size:50, width:780});
+  cellLab.position.set(0, 8.8, 0); cellLab.scale.set(4.5, 1.15, 1);
+  g.add(cellLab);
+
+  // Four plasmids — proportional to real backbone sizes
+  // pLenti-Transfer ≈ 13 kb · pMDLg/pRRE ≈ 8.8 kb · pRSV-Rev ≈ 4.4 kb · pMD2.G ≈ 5.8 kb
+  const plasmidSpecs = [
+    {name:'pLenti-TRANSFER', sub:'~13 kb · cis cassette',    color:COL.amber,   kb:13,  tilt:[0.25,0.1,0.35],  orbit:9.5},
+    {name:'pMDLg/pRRE',      sub:'~8.8 kb · gag/pol + RRE',  color:COL.cyan,    kb:8.8, tilt:[-0.2,0.8,-0.25], orbit:10.5},
+    {name:'pRSV-Rev',        sub:'~4.4 kb · Rev alone',      color:COL.violet,  kb:4.4, tilt:[0.6,-0.4,0.2],   orbit:10},
+    {name:'pMD2.G',          sub:'~5.8 kb · VSV-G',          color:COL.magenta, kb:5.8, tilt:[-0.5,-0.5,-0.4], orbit:11}
+  ];
+
+  const orbits = [];
+  plasmidSpecs.forEach((s, i) => {
+    const orbit = new THREE.Group();
+    orbit.rotation.set(s.tilt[0], s.tilt[1], s.tilt[2]);
+
+    orbit.add(new THREE.Mesh(
+      new THREE.TorusGeometry(s.orbit, 0.008, 8, 128),
+      new THREE.MeshBasicMaterial({color:s.color, transparent:true, opacity:0.2})
+    ));
+
+    const pR = 0.32 + Math.sqrt(s.kb) * 0.20; // radius ∝ √kb (area∝kb)
+    const plasmid = new THREE.Mesh(
+      new THREE.TorusGeometry(pR, 0.10, 16, 72),
+      glowMat(s.color, 1, 1.3)
+    );
+    plasmid.position.set(s.orbit, 0, 0); plasmid.rotation.x = Math.PI/2;
+    orbit.add(plasmid);
+
+    // Inner helix hint
+    const inner = new THREE.Mesh(
+      new THREE.TorusGeometry(pR, 0.025, 10, 72),
+      new THREE.MeshBasicMaterial({color:COL.pale, transparent:true, opacity:0.4})
+    );
+    inner.position.copy(plasmid.position); inner.rotation.copy(plasmid.rotation);
+    orbit.add(inner);
+
+    const lab = canvasLabel(s.name, {color:'#'+s.color.toString(16).padStart(6,'0'), sub:s.sub, size:40, width:720, height:180});
+    lab.position.set(s.orbit, pR + 0.9, 0); lab.scale.set(4.2, 1.05, 1);
+    orbit.add(lab);
+
+    // transfection filament
+    orbit.add(leaderLine([s.orbit, 0, 0],[0, 0, 0], s.color, 0.4));
+
+    orbit.userData = {speed:0.16 + i*0.025, label:lab};
+    g.add(orbit);
+    orbits.push(orbit);
+  });
+
+  // 3rd-gen safety badges
+  const badges = [
+    {text:'TAT-INDEPENDENT', sub:'chimeric 5′ RSV/CMV-R-U5', pos:[-5.5, 7.5, 0]},
+    {text:'SPLIT PACKAGING', sub:'gag/pol ⊥ rev on 2 helpers', pos:[5.5, 7.5, 0]},
+    {text:'SIN 3′ LTR',      sub:'ΔU3 → inert provirus',       pos:[0, -8.2, 0]}
+  ];
+  badges.forEach(b => {
+    const l = canvasLabel(b.text, {color:'#00ff9d', sub:b.sub, size:30, width:620, height:160});
+    l.position.set(...b.pos); l.scale.set(3.4, 0.9, 1);
+    l.userData.billboard = true;
+    g.add(l);
+  });
+
+  g.userData.tick = (t) => {
+    orbits.forEach(o => {
+      o.rotation.y = t * o.userData.speed;
+      o.userData.label.quaternion.copy(camera.quaternion);
+    });
+    nucCore.scale.setScalar(1 + Math.sin(t*2)*0.15);
+    cellLab.quaternion.copy(camera.quaternion);
+    g.children.forEach(c => { if(c.userData && c.userData.billboard) c.quaternion.copy(camera.quaternion); });
+  };
+  g.userData.camera = {pos:new THREE.Vector3(0, 6, 26), tgt:new THREE.Vector3(0,0,0)};
+})();
+
+/* ---------- SCENE 1 · TRANSFER PLASMID (cassette + bacterial backbone) ---------- */
+(function buildPlasmid(){
+  const g = groups[1];
+  const R = 7, tube = 0.45;
+
+  // Complete plasmid: cassette (packaged) + bacterial backbone (plasmid-only)
+  // Total ≈ 13.5 kb · bacterial backbone shown in dim gray to distinguish
+  const segments = [
+    // packaged cassette (between LTRs)
+    {name:'5′ LTR (hybrid)', kb:0.6,  color:COL.cyan,    grp:'cassette', subInfo:'RSV/CMV-R-U5'},
+    {name:'Ψ',               kb:0.35, color:COL.amber,   grp:'cassette'},
+    {name:'RRE',             kb:0.35, color:COL.magenta, grp:'cassette'},
+    {name:'cPPT/CTS',        kb:0.12, color:COL.amber,   grp:'cassette'},
+    {name:'EF1α',            kb:1.2,  color:COL.violet,  grp:'cassette'},
+    {name:'TRANSGENE',       kb:7.0,  color:COL.amber,   grp:'cassette', hero:true},
+    {name:'WPRE',            kb:0.6,  color:COL.magenta, grp:'cassette'},
+    {name:'3′ SIN LTR (ΔU3)',kb:0.3,  color:COL.cyan,    grp:'cassette'},
+    // bacterial backbone (NOT packaged into virion)
+    {name:'pUC ori',         kb:0.7,  color:0x6b7a94,    grp:'backbone'},
+    {name:'AmpR',            kb:1.1,  color:0x6b7a94,    grp:'backbone'},
+    {name:'SV40 ori',        kb:0.2,  color:0x6b7a94,    grp:'backbone'}
+  ];
+  const total = segments.reduce((s,x)=>s+x.kb, 0);
+
+  let angle = 0;
+  const meshes = [];
+  segments.forEach(seg => {
+    const arc = (seg.kb/total) * Math.PI*2;
+    const geo = new THREE.TorusGeometry(R, tube, 20, 160, arc);
+    const mat = seg.grp==='backbone'
+      ? new THREE.MeshStandardMaterial({color:seg.color, emissive:0x1a2840, emissiveIntensity:0.3, roughness:0.6, metalness:0.2, transparent:true, opacity:0.45})
+      : glowMat(seg.color, 1, seg.hero?1.6:1.0);
+    const m = new THREE.Mesh(geo, mat);
+    m.rotation.z = angle;
+    g.add(m); meshes.push(m);
+
+    // label at mid-angle (only for cassette + major backbone parts)
+    const mid = angle + arc/2;
+    const labR = R + (seg.hero ? 4.0 : 2.6);
+    const lx = Math.cos(mid)*labR, ly = Math.sin(mid)*labR;
+    const ex = Math.cos(mid)*(R+tube+0.15), ey = Math.sin(mid)*(R+tube+0.15);
+
+    if(seg.kb >= 0.2 || seg.hero){
+      g.add(leaderLine([ex,ey,0],[lx,ly,0], seg.color, seg.grp==='backbone'?0.35:0.55));
+      const isBb = seg.grp==='backbone';
+      const labColor = '#'+seg.color.toString(16).padStart(6,'0');
+      const lab = canvasLabel(seg.name, {
+        color:isBb?'#8aa0c7':labColor,
+        sub:(seg.subInfo? seg.subInfo+' · ' : '') + seg.kb.toFixed(seg.kb>=1?1:2)+' kb',
+        size:seg.hero?48:(isBb?30:38), width:720, height:180, weight:isBb?500:700
+      });
+      lab.position.set(lx, ly, 0);
+      lab.scale.set(seg.hero?4.6:(isBb?3.2:3.8), seg.hero?1.2:(isBb?0.9:1.0), 1);
+      g.add(lab);
+    }
+    angle += arc;
+  });
+
+  // Cassette/backbone divider arcs (visual grouping indicator)
+  const cassetteEndAng = segments.slice(0,8).reduce((s,x)=>s+(x.kb/total)*Math.PI*2, 0);
+  const mark1 = new THREE.Mesh(
+    new THREE.TorusGeometry(R+0.9, 0.04, 8, 120, cassetteEndAng),
+    new THREE.MeshBasicMaterial({color:COL.cyan, transparent:true, opacity:0.5})
+  );
+  g.add(mark1);
+  const mark2 = new THREE.Mesh(
+    new THREE.TorusGeometry(R+0.9, 0.04, 8, 120, Math.PI*2 - cassetteEndAng),
+    new THREE.MeshBasicMaterial({color:COL.dim, transparent:true, opacity:0.35})
+  );
+  mark2.rotation.z = cassetteEndAng;
+  g.add(mark2);
+  // group labels
+  const grpA = canvasLabel('PACKAGED CASSETTE', {color:'#00e5ff', sub:'transcribed → packaged as (+)ssRNA', size:28, width:700, height:140});
+  grpA.position.set(Math.cos(cassetteEndAng/2)*(R+2.0), Math.sin(cassetteEndAng/2)*(R+2.0), 0);
+  grpA.scale.set(0, 0, 0); // hidden by default to not clash — enable if needed
+  g.add(grpA);
+
+  // central emblem
+  const hub = new THREE.Mesh(new THREE.TorusGeometry(1.4, 0.04, 16, 80), new THREE.MeshBasicMaterial({color:COL.cyan, transparent:true, opacity:0.6}));
+  hub.rotation.x = Math.PI/2;
+  g.add(hub);
+  const centerLab = canvasLabel('pLenti-TRANSFER', {color:'#00e5ff', sub:'3RD-GEN SIN · ~13.5 kb TOTAL', size:42, width:760});
+  centerLab.position.set(0,0,0); centerLab.scale.set(4.6, 1.2, 1);
+  g.add(centerLab);
+
+  const pulse = new THREE.Mesh(new THREE.SphereGeometry(0.25, 20, 20), glowMat(COL.pale, 1, 3));
+  g.add(pulse);
+
+  g.userData.tick = (t) => {
+    g.rotation.z = t * 0.07;
+    const pa = (t*0.4) % (Math.PI*2);
+    pulse.position.set(Math.cos(-pa)*R, Math.sin(-pa)*R, 0);
+    pulse.scale.setScalar(0.8 + Math.sin(t*4)*0.2);
+    meshes.forEach(m => { if(m.userData.hero) m.material.emissiveIntensity = 1.3 + Math.sin(t*1.8)*0.4; });
+    centerLab.quaternion.copy(camera.quaternion);
+  };
+  g.userData.camera = {pos:new THREE.Vector3(0, 4, 23), tgt:new THREE.Vector3(0,0,0)};
+})();
+
+/* ---------- SCENE 2 · PACKAGING CAPACITY (EF1α vs EFS comparison + titer curve) ---------- */
+(function buildCapacity(){
+  const g = groups[2];
+  const U = 2; // units/kb
+
+  // Two scenarios stacked:
+  //  A) EF1α (1.2 kb) → 10.25 kb total  — OVER soft limit
+  //  B) EFS  (0.2 kb) →  9.25 kb total  — VIABLE
+  // Other cis: 5'LTR 0.6 + Ψ 0.35 + RRE 0.35 + cPPT 0.12 + transgene 7.0 + WPRE 0.6 + 3'SIN 0.3 + polyA ~0.2 = ~9.12 kb without promoter
+
+  const nonPromCis = 0.6+0.35+0.35+0.12+0.6+0.3+0.2; // 2.52 kb
+  const transgene = 7.0;
+  const scenarios = [
+    {
+      y: 3.2,
+      name:'SCENARIO A · EF1α PROMOTER',
+      promKb: 1.2,
+      status:'OVER SOFT LIMIT',
+      statusColor:COL.red,
+      total: nonPromCis + 1.2 + transgene // 10.72
+    },
+    {
+      y: -0.2,
+      name:'SCENARIO B · EFS (EF1α SHORT)',
+      promKb: 0.2,
+      status:'WITHIN LIMIT',
+      statusColor:COL.green,
+      total: nonPromCis + 0.2 + transgene // 9.72... hmm let me recalc
+    }
+  ];
+  // Recompute: nonPromCis 2.52 + prom + 7 → A: 10.72, B: 9.72. B is still slightly over 9.5. Let me use MNDU3 (~0.6) → 10.12... also over.
+  // Actual engineering reality: with a 7 kb transgene you're REALLY tight. Let me show both honestly:
+  //   A: EF1α 1.2 kb → 10.72 (over soft limit)
+  //   B: EFS 0.2 kb → 9.72 (marginal, just above 9.5)
+  // Label accordingly.
+
+  scenarios[0].status = 'OVER (~10.7 kb)';
+  scenarios[0].statusColor = COL.red;
+  scenarios[1].status = 'MARGINAL (~9.7 kb)';
+  scenarios[1].statusColor = COL.amber;
+
+  scenarios.forEach(sc => {
+    const totalW = sc.total * U;
+    const startX = -totalW/2;
+
+    // outline
+    const wire = new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(totalW, 1.4, 1.2)),
+      new THREE.LineBasicMaterial({color:sc.statusColor, transparent:true, opacity:0.5})
+    );
+    wire.position.set(0, sc.y, 0);
+    g.add(wire);
+
+    // segments
+    const segs = [
+      {kb:0.6+0.35,    color:COL.cyan,    name:"5'LTR+Ψ"},
+      {kb:0.35+0.12,   color:COL.magenta, name:'RRE/cPPT'},
+      {kb:sc.promKb,   color:COL.violet,  name:'Promoter'},
+      {kb:7.0,         color:COL.amber,   name:'TRANSGENE', hero:true},
+      {kb:0.6,         color:COL.magenta, name:'WPRE'},
+      {kb:0.3+0.2,     color:COL.cyan,    name:'3′SIN+pA'}
+    ];
+    let x = startX;
+    segs.forEach(s => {
+      const w = s.kb * U;
+      const m = new THREE.Mesh(
+        new THREE.BoxGeometry(w - 0.04, 1.35, 1.15),
+        glowMat(s.color, 0.92, s.hero?1.6:0.9)
+      );
+      m.position.set(x + w/2, sc.y, 0);
+      g.add(m);
+      const e = new THREE.LineSegments(
+        new THREE.EdgesGeometry(new THREE.BoxGeometry(w-0.04, 1.35, 1.15)),
+        new THREE.LineBasicMaterial({color:s.color, transparent:true, opacity:0.7})
+      );
+      e.position.copy(m.position); g.add(e);
+      x += w;
+    });
+
+    // soft-limit indicator line at 9.5 kb
+    const limitX = startX + 9.5 * U;
+    if(9.5 < sc.total){
+      const limMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(0.08, 2.4, 1.5),
+        new THREE.MeshBasicMaterial({color:COL.red, transparent:true, opacity:0.7})
+      );
+      limMesh.position.set(limitX, sc.y, 0);
+      g.add(limMesh);
+    }
+
+    // labels
+    const name = canvasLabel(sc.name, {color:'#'+sc.statusColor.toString(16).padStart(6,'0'), sub:'TOTAL '+sc.total.toFixed(1)+' kb · '+sc.status, size:36, width:900, height:170});
+    name.position.set(0, sc.y + 1.55, 0);
+    name.scale.set(6.5, 1.25, 1);
+    g.add(name);
+
+    // status pill on right
+    const pill = canvasLabel(sc.status.split(' ')[0], {color:'#'+sc.statusColor.toString(16).padStart(6,'0'), size:40, width:280, height:120});
+    pill.position.set(totalW/2 + 2.5, sc.y, 0);
+    pill.scale.set(2.6, 1.1, 1);
+    g.add(pill);
+  });
+
+  // Global 9.5 kb soft-limit marker + title
+  const title = canvasLabel('PACKAGING BUDGET', {color:'#00e5ff', sub:'TITER ~2× per kb ABOVE ~9.5 kb · Kumar 2001 · al Yacoub 2007', size:40, width:1100, height:170});
+  title.position.set(0, 6.8, 0); title.scale.set(7, 1.15, 1);
+  g.add(title);
+
+  // Titer curve (inset, schematic)
+  const curveGrp = new THREE.Group();
+  curveGrp.position.set(0, -4.8, 0);
+  // draw curve as line
+  const pts = [];
+  for(let k=4; k<=11; k+=0.1){
+    const x = (k - 7.5) * 1.8; // center around 7.5
+    // relative titer: 1.0 up to 8 kb, then drop
+    let rel = 1.0;
+    if(k > 8) rel = Math.pow(0.5, (k-8)/1.0); // half per kb above 8
+    rel = Math.max(rel, 0.02);
+    const y = rel * 1.4 - 0.7;
+    pts.push(new THREE.Vector3(x, y, 0));
+  }
+  const curveGeo = new THREE.BufferGeometry().setFromPoints(pts);
+  curveGrp.add(new THREE.Line(curveGeo, new THREE.LineBasicMaterial({color:COL.cyan, linewidth:2})));
+  // axis
+  curveGrp.add(new THREE.Mesh(new THREE.BoxGeometry(13, 0.02, 0.02), new THREE.MeshBasicMaterial({color:COL.dim, transparent:true, opacity:0.5})));
+  // 9.5 kb soft-limit vertical line
+  const vx = (9.5 - 7.5)*1.8;
+  curveGrp.add(new THREE.Mesh(new THREE.BoxGeometry(0.03, 1.8, 0.03), new THREE.MeshBasicMaterial({color:COL.red, transparent:true, opacity:0.7})).translateX(vx).translateY(0.2));
+  // x-axis labels
+  [6,7,8,9,10,11].forEach(k => {
+    const lx = (k-7.5)*1.8;
+    const tl = canvasLabel(k.toString(), {color:'#8aa0c7', size:32, width:120, height:80});
+    tl.position.set(lx, -1.0, 0); tl.scale.set(0.6, 0.4, 1);
+    curveGrp.add(tl);
+  });
+  const cLab = canvasLabel('RELATIVE FUNCTIONAL TITER', {color:'#00e5ff', sub:'vs. GENOMIC SIZE (kb between LTRs)', size:26, width:780, height:130});
+  cLab.position.set(0, 1.2, 0); cLab.scale.set(3.9, 0.65, 1);
+  curveGrp.add(cLab);
+  g.add(curveGrp);
+
+  g.userData.tick = (t) => {
+    g.position.y = Math.sin(t*0.4)*0.1;
+  };
+  g.userData.camera = {pos:new THREE.Vector3(0, 2, 30), tgt:new THREE.Vector3(0,0,0)};
+})();
+
+/* ---------- SCENE 3 · MATURE VIRION (pleomorphic envelope + trimeric VSV-G) ---------- */
+(function buildVirion(){
+  const g = groups[3];
+  const envR = 5.8;
+
+  // Pleomorphic lipid envelope (roughly spherical, slight deformation like real virions)
+  const envGeo = pleomorphicSphere(envR, 0.035, 96);
+  const env = new THREE.Mesh(envGeo, glassMat(COL.cyan, 0.12));
+  g.add(env);
+  const envWire = new THREE.Mesh(envGeo.clone(),
+    new THREE.MeshBasicMaterial({color:COL.cyan, wireframe:true, transparent:true, opacity:0.18}));
+  g.add(envWire);
+
+  // VSV-G TRIMERS — three stalks converging + trimeric head (3 lobes)
+  function makeTrimer(){
+    const t = new THREE.Group();
+    // three stalks converging at base, fanning slightly at head
+    for(let i=0; i<3; i++){
+      const ang = i*Math.PI*2/3;
+      const r0 = 0.06, r1 = 0.13;
+      const stalk = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.032, 0.048, 0.65, 6),
+        glowMat(COL.magenta, 1, 1.0)
+      );
+      stalk.position.set(Math.cos(ang)*((r0+r1)/2), 0.32, Math.sin(ang)*((r0+r1)/2));
+      // slight outward tilt at top
+      const axis = new THREE.Vector3(-Math.sin(ang), 0, Math.cos(ang));
+      stalk.rotateOnAxis(axis, 0.12);
+      t.add(stalk);
+    }
+    // trimeric head (three lobes fused)
+    for(let i=0; i<3; i++){
+      const ang = i*Math.PI*2/3;
+      const lobe = new THREE.Mesh(
+        new THREE.SphereGeometry(0.11, 12, 12),
+        glowMat(COL.magenta, 1, 1.9)
+      );
+      lobe.position.set(Math.cos(ang)*0.09, 0.72, Math.sin(ang)*0.09);
+      t.add(lobe);
+    }
+    return t;
+  }
+
+  // distribute ~90 trimers on envelope surface (Fibonacci sphere)
+  const spikeGrp = new THREE.Group();
+  const N = 88;
+  for(let i=0; i<N; i++){
+    const phi = Math.acos(1 - 2*(i+0.5)/N);
+    const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+    const x = Math.sin(phi)*Math.cos(theta);
+    const y = Math.sin(phi)*Math.sin(theta);
+    const z = Math.cos(phi);
+    const tri = makeTrimer();
+    const dir = new THREE.Vector3(x,y,z);
+    const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), dir);
+    tri.quaternion.copy(q);
+    // follow pleomorphic surface by applying same displacement
+    const disp = 1 + 0.035 * noise3(x*envR, y*envR, z*envR);
+    tri.position.copy(dir.multiplyScalar(envR*disp + 0.02));
+    spikeGrp.add(tri);
+  }
+  g.add(spikeGrp);
+
+  // Matrix (p17) — inner spherical shell
+  const matrix = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(envR - 0.5, 2),
+    new THREE.MeshBasicMaterial({color:COL.violet, wireframe:true, transparent:true, opacity:0.28})
+  );
+  g.add(matrix);
+
+  // Conical capsid (p24) — diagnostic lentiviral morphology
+  const capGrp = new THREE.Group();
+  const capGeo = new THREE.ConeGeometry(2.1, 4.9, 12, 1, false);
+  const cap = new THREE.Mesh(capGeo, new THREE.MeshStandardMaterial({
+    color:0x0f1f3a, emissive:0x1a4bff, emissiveIntensity:0.35,
+    roughness:0.35, metalness:0.15, transparent:true, opacity:0.9
+  }));
+  capGrp.add(cap);
+  // hexameric lattice overlay
+  const capWire = new THREE.Mesh(
+    new THREE.ConeGeometry(2.12, 4.92, 18, 3, false),
+    new THREE.MeshBasicMaterial({color:COL.cyan, wireframe:true, transparent:true, opacity:0.5})
+  );
+  capGrp.add(capWire);
+  capGrp.rotation.z = 0.55; capGrp.rotation.x = 0.2;
+  g.add(capGrp);
+
+  // Two dimerized (+)ssRNA copies — wrapped helically, joined at top (DIS)
+  function makeRNA(offset, color, opacity=1){
+    const pts = [];
+    for(let i=0; i<=140; i++){
+      const u = i/140;
+      const a = u*Math.PI*5;
+      const r = 0.85 + Math.sin(a*1.5)*0.15;
+      pts.push(new THREE.Vector3(Math.cos(a+offset)*r*0.5, (u-0.5)*3.4, Math.sin(a+offset)*r*0.5));
+    }
+    return new THREE.Mesh(
+      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 200, 0.055, 10, false),
+      glowMat(color, opacity, 1.7)
+    );
+  }
+  const rna1 = makeRNA(0, COL.amber);
+  const rna2 = makeRNA(Math.PI, 0xffcc80);
+  capGrp.add(rna1); capGrp.add(rna2);
+
+  // DIS dimer contact point (top of capsid)
+  const dis = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 16), glowMat(COL.pale, 1, 3));
+  dis.position.y = 1.4; capGrp.add(dis);
+
+  // Enzymes: RT / IN / PR
+  const enzymes = [
+    {color:COL.green, pos:[0.3, -0.5, 0.4], label:'RT'},
+    {color:COL.green, pos:[-0.4, 0.7, -0.2], label:'IN'},
+    {color:COL.green, pos:[0.5, 0.2, -0.4], label:'PR'},
+    {color:COL.green, pos:[-0.2, -1.0, 0.3], label:''}
+  ];
+  enzymes.forEach(e => {
+    const d = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 16), glowMat(e.color, 1, 2.4));
+    d.position.set(...e.pos);
+    capGrp.add(d);
+  });
+
+  // Scale bar "~110 nm"
+  const scaleBar = new THREE.Mesh(
+    new THREE.BoxGeometry(3.5, 0.05, 0.05),
+    new THREE.MeshBasicMaterial({color:COL.pale, transparent:true, opacity:0.7})
+  );
+  scaleBar.position.set(0, -envR - 1.8, 0);
+  g.add(scaleBar);
+  const scaleLab = canvasLabel('~110 nm', {color:'#e8f2ff', sub:'approx. particle diameter', size:28, width:360, height:120});
+  scaleLab.position.set(0, -envR - 2.5, 0); scaleLab.scale.set(1.8, 0.6, 1);
+  g.add(scaleLab);
+
+  // Callouts
+  const callouts = [
+    {text:'VSV-G TRIMER',   sub:'3× G glycoprotein · ~75 kDa ea.', at:[envR*0.7, envR*0.55, 0], to:[9.5, 5.5, 0],  color:'#ff3dc8'},
+    {text:'LIPID BILAYER',  sub:'host-derived · pleomorphic',      at:[envR*0.95, 0, 0],        to:[11, 2, 0],     color:'#00e5ff'},
+    {text:'MATRIX · p17',   sub:'~2000 monomers inner leaflet',    at:[-envR*0.7, -envR*0.3, 0],to:[-10, -2, 0],   color:'#7c5cff'},
+    {text:'CONICAL CAPSID', sub:'p24 · ~250 hex + 12 pent',        at:[-1.5, 1.2, 0],           to:[-10, 5.2, 0],  color:'#00e5ff'},
+    {text:'(+) ssRNA DIMER',sub:'2× ~9 kb · DIS-linked · carries 7 kb transgene', at:[0.4, -0.6, 0], to:[10, -5, 0], color:'#ffb14d'},
+    {text:'RT · IN · PR',   sub:'~50 copies RT · primed for RT',   at:[-0.8, -0.2, 0.5],        to:[-10, -6, 0],   color:'#00ff9d'}
+  ];
+  callouts.forEach(c => {
+    g.add(leaderLine(c.at, c.to, parseInt(c.color.slice(1),16), 0.55));
+    const l = canvasLabel(c.text, {color:c.color, sub:c.sub, size:36, width:780, height:170, align:'left'});
+    l.position.set(c.to[0] + Math.sign(c.to[0])*2.8, c.to[1], c.to[2]);
+    l.scale.set(5, 1.1, 1);
+    g.add(l);
+  });
+
+  const title = canvasLabel('MATURE LENTIVIRAL VIRION', {color:'#00e5ff', sub:'VSV-G PSEUDOTYPED · 3RD-GEN · ~110 nm', size:42, width:1000});
+  title.position.set(0, envR + 3.2, 0); title.scale.set(6.5, 1.2, 1);
+  g.add(title);
+
+  g.userData.tick = (t) => {
+    g.rotation.y = t * 0.2;
+    capGrp.rotation.y = t * 0.5;
+    rna1.rotation.y = t * 0.7; rna2.rotation.y = -t * 0.7;
+    spikeGrp.children.forEach((s, i) => s.scale.setScalar(1 + Math.sin(t*2 + i*0.25)*0.03));
+  };
+  g.userData.camera = {pos:new THREE.Vector3(0, 3, 22), tgt:new THREE.Vector3(0,0,0)};
+})();
+
+/* ---------- SCENE 4 · LIFECYCLE (RNA → RT → SIN provirus → effector cell) ---------- */
+(function buildLifecycle(){
+  const g = groups[4];
+
+  // Horizontal flow; 4 stages at x = -14, -5, 5, 14.5
+  function makeSegmentedBar(segs, totalW, y, height=0.9){
+    const grp = new THREE.Group();
+    grp.position.y = y;
+    const sum = segs.reduce((s,x)=>s+x.kb,0);
+    let x = -totalW/2;
+    segs.forEach(s => {
+      const w = (s.kb/sum) * totalW;
+      const m = new THREE.Mesh(
+        new THREE.BoxGeometry(w-0.02, height, 0.4),
+        glowMat(s.color, s.op||1, s.hero?1.5:0.9)
+      );
+      m.position.set(x+w/2, 0, 0);
+      grp.add(m);
+      // label below (only for labeled segments)
+      if(s.name){
+        const l = canvasLabel(s.name, {color:'#'+s.color.toString(16).padStart(6,'0'), size:22, width:360, height:80});
+        l.position.set(x+w/2, -height/2 - 0.5, 0);
+        l.scale.set(1.3, 0.3, 1);
+        grp.add(l);
+      }
+      x += w;
+    });
+    return grp;
+  }
+
+  // ===== Stage 1: packaged (+)ssRNA =====
+  const s1 = new THREE.Group(); s1.position.x = -14;
+  const rnaSegs = [
+    {name:'R-U5',      kb:0.2, color:COL.cyan},
+    {name:'Ψ',         kb:0.4, color:COL.amber},
+    {name:'gag-RRE',   kb:0.7, color:COL.magenta, op:0.5},
+    {name:'cPPT',      kb:0.2, color:COL.amber},
+    {name:'EFS',       kb:0.3, color:COL.violet},
+    {name:'TRANSGENE', kb:7.0, color:COL.amber, hero:true},
+    {name:'WPRE',      kb:0.6, color:COL.magenta},
+    {name:'U3-R-U5',   kb:0.6, color:COL.cyan}
+  ];
+  s1.add(makeSegmentedBar(rnaSegs, 8, 0, 0.9));
+  const s1Lab = canvasLabel('(+) ssRNA GENOME', {color:'#00e5ff', sub:'PACKAGED · 2× COPIES · ~9 kb each', size:30, width:620, height:140});
+  s1Lab.position.set(0, 1.5, 0); s1Lab.scale.set(3.7, 0.85, 1);
+  s1.add(s1Lab);
+  // stage number
+  const s1N = canvasLabel('01', {color:'#00e5ff', sub:'ENTRY', size:60, width:280, height:180, weight:700});
+  s1N.position.set(0, -2.5, 0); s1N.scale.set(2, 1.25, 1);
+  s1.add(s1N);
+  // emphasize asymmetric LTRs
+  g.add(s1);
+
+  // ===== Stage 2: Reverse Transcription (dsDNA with ΔU3 at BOTH LTRs) =====
+  const s2 = new THREE.Group(); s2.position.x = -4.5;
+  const dnaSegs = [
+    {name:'ΔU3-R-U5', kb:0.45, color:COL.cyan},
+    {name:'Ψ',         kb:0.4, color:COL.amber},
+    {name:'cis',       kb:0.9, color:COL.magenta, op:0.55},
+    {name:'TRANSGENE', kb:7.0, color:COL.amber, hero:true},
+    {name:'WPRE',      kb:0.6, color:COL.magenta},
+    {name:'ΔU3-R-U5', kb:0.45, color:COL.cyan}
+  ];
+  s2.add(makeSegmentedBar(dnaSegs, 8, 0, 0.9));
+  // double-strand indicator (second bar just below)
+  const ds = makeSegmentedBar(dnaSegs, 8, 0, 0.25);
+  ds.position.y = -0.8;
+  ds.scale.y = 0.4;
+  s2.add(ds);
+  const s2Lab = canvasLabel('LINEAR dsDNA', {color:'#00e5ff', sub:'3′ ΔU3 DUPLICATED TO 5′ LTR · SIN', size:30, width:660, height:140});
+  s2Lab.position.set(0, 1.5, 0); s2Lab.scale.set(4, 0.85, 1);
+  s2.add(s2Lab);
+  const s2N = canvasLabel('02', {color:'#00e5ff', sub:'REVERSE TRANSCRIPTION', size:60, width:540, height:180});
+  s2N.position.set(0, -2.5, 0); s2N.scale.set(3.4, 1.1, 1);
+  s2.add(s2N);
+  g.add(s2);
+
+  // ===== Stage 3: Integrated SIN provirus (on chromosome) =====
+  const s3 = new THREE.Group(); s3.position.x = 5.5;
+  // chromosome line
+  const chromo = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.12, 0.12, 10, 12),
+    new THREE.MeshBasicMaterial({color:0x3a4c70, transparent:true, opacity:0.7})
+  );
+  chromo.rotation.z = Math.PI/2;
+  chromo.position.y = 0;
+  s3.add(chromo);
+  // provirus insertion
+  const prov = makeSegmentedBar(dnaSegs, 7, 0, 0.7);
+  prov.position.y = 0;
+  s3.add(prov);
+  // inactive LTR indicator
+  const inactiveLab = canvasLabel('LTR INERT', {color:'#00ff9d', sub:'no U3 → no LTR-driven tx', size:24, width:440, height:120});
+  inactiveLab.position.set(-3.5, 1.2, 0); inactiveLab.scale.set(2.4, 0.7, 1);
+  s3.add(inactiveLab);
+  const inactiveLab2 = canvasLabel('LTR INERT', {color:'#00ff9d', sub:'3′ flanking provirus', size:24, width:440, height:120});
+  inactiveLab2.position.set(3.5, 1.2, 0); inactiveLab2.scale.set(2.4, 0.7, 1);
+  s3.add(inactiveLab2);
+  const s3Lab = canvasLabel('INTEGRATED PROVIRUS', {color:'#00e5ff', sub:'INT-MEDIATED · SEMI-RANDOM · GENE-RICH REGIONS', size:30, width:860, height:140});
+  s3Lab.position.set(0, 2.0, 0); s3Lab.scale.set(5.2, 0.85, 1);
+  s3.add(s3Lab);
+  const s3N = canvasLabel('03', {color:'#00e5ff', sub:'INTEGRATION (IN)', size:60, width:540, height:180});
+  s3N.position.set(0, -2.5, 0); s3N.scale.set(3.4, 1.1, 1);
+  s3.add(s3N);
+  g.add(s3);
+
+  // ===== Stage 4: Transduced effector cell =====
+  const s4 = new THREE.Group(); s4.position.x = 14.8;
+  const tcell = new THREE.Mesh(pleomorphicSphere(2.2, 0.06, 48), glassMat(COL.cyan, 0.18));
+  s4.add(tcell);
+  const tnuc = new THREE.Mesh(pleomorphicSphere(0.95, 0.05, 32), glassMat(COL.violet, 0.35));
+  s4.add(tnuc);
+  // integrated provirus dot
+  const provDot = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.1, 0.1), glowMat(COL.amber, 1, 2));
+  provDot.position.y = 0.1;
+  s4.add(provDot);
+  // TCR/CAR on surface
+  for(let i=0;i<8;i++){
+    const ang = (i/8)*Math.PI*2;
+    const tcr = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.035, 0.04, 0.35, 6),
+      glowMat(COL.amber, 1, 1.5)
+    );
+    tcr.position.set(Math.cos(ang)*2.3, 0.4, Math.sin(ang)*2.3);
+    tcr.rotation.z = -Math.cos(ang)*Math.PI/4;
+    tcr.rotation.x = Math.sin(ang)*Math.PI/4;
+    s4.add(tcr);
+  }
+  const s4Lab = canvasLabel('EFFECTOR CELL', {color:'#00e5ff', sub:'CAR-T · TCR-T · NK · TUMOR-TARGETING', size:30, width:760, height:140});
+  s4Lab.position.set(0, 3.4, 0); s4Lab.scale.set(4.6, 0.85, 1);
+  s4.add(s4Lab);
+  const s4N = canvasLabel('04', {color:'#00e5ff', sub:'STABLE EXPRESSION', size:60, width:540, height:180});
+  s4N.position.set(0, -3.2, 0); s4N.scale.set(3.4, 1.1, 1);
+  s4.add(s4N);
+  g.add(s4);
+
+  // Arrows between stages
+  const arrows = [{from:[-9.5, 0, 0], to:[-8.5, 0, 0], label:'RT', sub:'tRNA-Lys3 primer'},
+                  {from:[-0.5, 0, 0], to:[1.5, 0, 0],  label:'IN',  sub:'3′-P + strand transfer'},
+                  {from:[10, 0, 0],   to:[12, 0, 0],   label:'tx',  sub:'internal promoter'}];
+  arrows.forEach(a => {
+    const dir = new THREE.Vector3(a.to[0]-a.from[0], a.to[1]-a.from[1], a.to[2]-a.from[2]);
+    const len = dir.length();
+    dir.normalize();
+    const arr = new THREE.ArrowHelper(dir, new THREE.Vector3(...a.from), len, COL.cyan, 0.3, 0.18);
+    g.add(arr);
+    const l = canvasLabel(a.label, {color:'#00e5ff', sub:a.sub, size:22, width:380, height:100});
+    l.position.set((a.from[0]+a.to[0])/2, 0.8, 0);
+    l.scale.set(1.9, 0.5, 1);
+    g.add(l);
+  });
+
+  const title = canvasLabel('LIFECYCLE · RNA → INTEGRATION → EXPRESSION', {color:'#00e5ff', sub:'SIN ONLY MANIFESTS POST-RT · Zufferey 1998 · Miyoshi 1998', size:38, width:1180, height:160});
+  title.position.set(0, 5.2, 0); title.scale.set(7.2, 1.0, 1);
+  g.add(title);
+
+  g.userData.tick = (t) => {
+    // subtle pulse on provirus
+    provDot.scale.setScalar(1 + Math.sin(t*2)*0.2);
+    g.rotation.y = Math.sin(t*0.15)*0.12;
+  };
+  g.userData.camera = {pos:new THREE.Vector3(0, 2, 32), tgt:new THREE.Vector3(0,0,0)};
+})();
+
+/* =========================================================
+   Scene info (scientific content)
+========================================================= */
+const INFO = [
+  {
+    tag:'STAGE 01 · CO-TRANSFECTION',
+    title:'HEK293T Producer · 4-Plasmid 3rd-Gen System',
+    body:'Four plasmids are transiently co-transfected into HEK293T producer cells. The transfer plasmid carries the <em>cis</em>-acting cassette between a hybrid 5′ LTR (<code>RSV/CMV-R-U5</code>) and a ΔU3 3′ LTR. The <em>trans</em> functions — <b>gag/pol</b> (on <code>pMDLg/pRRE</code>), <b>Rev</b> (on <code>pRSV-Rev</code>), and <b>VSV-G</b> env (on <code>pMD2.G</code>) — are distributed across three separate helper plasmids.',
+    mechanism:'The hybrid 5′ LTR drives full-length genomic RNA independently of Tat, enabling <b>deletion of Tat</b>. Splitting gag/pol from Rev onto two helpers makes recombination-driven reconstitution of a replication-competent lentivirus (RCL) mathematically vanishing.',
+    specs:[
+      ['CELL LINE','HEK293T','hi'],
+      ['PLASMIDS','4','amber'],
+      ['GENERATION','3rd','hi'],
+      ['RCL RISK','negligible','ok'],
+      ['Tat REQ.','no','ok'],
+      ['TYPICAL TITER','1e7–1e8 IU/mL','amber']
+    ],
+    citation:'<b>Dull et al. 1998</b> — J Virol 72(11):8463 · 3rd-gen system foundational paper.'
+  },
+  {
+    tag:'STAGE 02 · TRANSFER PLASMID',
+    title:'pLenti Vector · Cassette + Bacterial Backbone',
+    body:'The transfer plasmid is circular dsDNA (~13.5 kb total) propagated in <em>E. coli</em>. Only the <b>cassette between LTRs</b> (cyan outer arc) is transcribed and packaged. The <b>bacterial backbone</b> (<code>pUC ori</code>, <code>AmpR</code>, <code>SV40 ori</code>, dim gray) enables plasmid propagation and transient replication but is never packaged into virions.',
+    mechanism:'Ψ (psi) at the 5′ leader recruits NC for <b>selective packaging</b>. <b>RRE + Rev</b> exports unspliced genomic RNA from the nucleus. <b>cPPT/CTS</b> generates a central DNA flap that accelerates nuclear import of the pre-integration complex. <b>WPRE</b> stabilizes the transcript post-transcriptionally and boosts transgene expression 5–8×.',
+    specs:[
+      ['TOTAL PLASMID','~13.5 kb',''],
+      ['PACKAGED CASSETTE','~10.3 kb','amber'],
+      ['TRANSGENE','7.0 kb','amber'],
+      ['PROMOTER','EF1α (1.2 kb)','hi'],
+      ['5′ LTR','hybrid RSV/CMV-R-U5','ok'],
+      ['3′ LTR','ΔU3 SIN','ok']
+    ],
+    citation:'<b>Zufferey et al. 1998</b> — J Virol 72(12):9873 · SIN LTR design.  &nbsp;<b>Zennou et al. 2000</b> — Cell 101:173 · cPPT/CTS flap.'
+  },
+  {
+    tag:'STAGE 03 · PACKAGING BUDGET',
+    title:'Capacity · A Real Engineering Tradeoff',
+    body:'Functional titer <b>decays ~2-fold per kb</b> above ~9.5 kb between LTRs — not a hard cliff. With a 7 kb transgene, <b>promoter choice is a design decision</b>: full-length <code>EF1α</code> (1.2 kb) pushes the cassette to <em>~10.7 kb</em> (significant titer loss); <code>EFS</code> (0.2 kb, intron-less) or <code>MNDU3</code> (~0.6 kb) recover headroom at the cost of expression level/kinetics.',
+    mechanism:'The limit is set by <b>reverse-transcription processivity and packaging efficiency</b>, not a rigid capsid cap. Above ~9.5 kb, RT completion rates drop and packaging becomes less frequent. Engineers commonly trim WPRE variants (WPRE3, ~250 bp) and swap EF1α→EFS/EFS1α to reclaim 1 kb.',
+    specs:[
+      ['SOFT LIMIT','~9.5 kb','hi'],
+      ['SCENARIO A (EF1α)','10.7 kb','warn'],
+      ['SCENARIO B (EFS)','9.7 kb','amber'],
+      ['TITER DECAY','~2×/kb>9 kb','warn'],
+      ['STRATEGY','trim WPRE / swap prom.','ok'],
+      ['TYPICAL HEADROOM','0.3–0.8 kb',''],
+    ],
+    citation:'<b>Kumar et al. 2001</b> — Hum Gene Ther 12(15):1893 · capacity vs titer.  <b>al Yacoub et al. 2007</b> — J Gene Med 9(7):579.'
+  },
+  {
+    tag:'STAGE 04 · MATURE VIRION',
+    title:'Pseudotyped Particle · ~110 nm',
+    body:'Lentiviral virions are <b>pleomorphic</b> enveloped particles, not geometric solids. A host-derived lipid bilayer carries ~70–100 <b>VSV-G trimers</b>. A <em>p17</em> matrix lines the inner leaflet. The diagnostic <b>conical p24 capsid</b> (~250 hexamers + 12 pentamers) encloses a dimeric (+)ssRNA genome, ~50 copies of RT, IN, and PR, and accessory factors.',
+    mechanism:'<b>VSV-G</b> binds <code>LDL-R</code> family receptors on nearly all cell types, enabling broad tropism and high-titer concentration by ultracentrifugation. On acidified endosomal entry, VSV-G drives fusion; the capsid enters the cytoplasm and initiates reverse transcription using <b>tRNA-Lys3</b> primer annealed to the PBS.',
+    specs:[
+      ['DIAMETER','~100–120 nm','hi'],
+      ['SPIKES/VIRION','70–100 VSV-G trimers',''],
+      ['GENOME','2× (+)ssRNA, DIS-linked','amber'],
+      ['CAPSID','p24 conical, fullerene',''],
+      ['MATRIX','p17 (~2000 monomers)',''],
+      ['ENTRY RECEPTOR','LDL-R family','ok']
+    ],
+    citation:'<b>Finkelshtein et al. 2013</b> — PNAS 110:7306 · VSV-G receptor. <b>Pornillos et al. 2011</b> — Nature 469:424 · capsid structure.'
+  },
+  {
+    tag:'STAGE 05 · LIFECYCLE',
+    title:'RNA → RT → SIN Provirus → Expression',
+    body:'The packaged (+)ssRNA has asymmetric ends: <code>R-U5</code> at 5′ and <code>U3-R-U5</code> at 3′. During reverse transcription, the 3′ <b>ΔU3</b> is copied to <b>both</b> LTRs of the linear dsDNA — this is how <em>self-inactivation</em> physically happens. <b>IN</b> then integrates the provirus into active chromatin (semi-random, biased toward gene-rich regions). The integrated provirus <b>cannot drive LTR-based transcription</b>; only the internal promoter (EF1α/EFS) is active.',
+    mechanism:'SIN design <b>prevents mobilization</b> by wild-type HIV co-infection and <b>reduces insertional oncogenesis</b> vs. γ-retroviral LTR-driven vectors. Integration is mediated by IN via 3′-end processing and strand transfer at host DNA — drivers of the field\'s favorable safety profile in ex vivo CGT.',
+    specs:[
+      ['ENTRY → INTEG.','~12–24 h',''],
+      ['INTEG. SITES','~5e5 / human genome',''],
+      ['LTR TX POST-INTEG.','inert (ΔU3)','ok'],
+      ['INTERNAL PROMOTER','active','ok'],
+      ['ONCOGENESIS RISK','low vs γ-retro','ok'],
+      ['EFFECTOR USE','CAR-T / TCR-T / NK','amber']
+    ],
+    citation:'<b>Miyoshi et al. 1998</b> — J Virol 72(10):8150 · SIN vector. <b>Schröder et al. 2002</b> — Cell 110:521 · HIV integration preference.'
+  }
+];
+
+const infoEl = document.getElementById('info');
+const sceneNameEl = document.getElementById('scene-name');
+const SCENE_NAMES = ['PRODUCER CELL','TRANSFER PLASMID','PACKAGING BUDGET','MATURE VIRION','LIFECYCLE'];
+
+function renderInfo(i){
+  const d = INFO[i];
+  infoEl.classList.add('switching');
+  setTimeout(() => {
+    infoEl.innerHTML = `
+      <div class="info-tag">${d.tag}</div>
+      <div class="info-title">${d.title}</div>
+      <div class="info-body">${d.body}</div>
+      ${d.mechanism ? `<div class="mechanism"><div class="mechanism-label">Mechanism</div>${d.mechanism}</div>`:''}
+      <div class="spec-grid">
+        ${d.specs.map(([l,v,c])=>`<div class="spec-cell"><div class="spec-label">${l}</div><div class="spec-val ${c||''}">${v}</div></div>`).join('')}
+      </div>
+      ${d.citation ? `<div class="citation">${d.citation}</div>`:''}`;
+    infoEl.classList.remove('switching');
+  }, 140);
+  sceneNameEl.textContent = SCENE_NAMES[i];
+}
+
+/* scene switching */
+let activeIndex = 0;
+let camFrom=null, camTo=null, tgtFrom=null, tgtTo=null, tween=1;
+
+function switchScene(i){
+  if(i === activeIndex) return;
+  activeIndex = i;
+  groups.forEach((gr, k) => gr.visible = (k === i));
+  const tgt = groups[i].userData.camera;
+  camFrom = camera.position.clone();
+  camTo = tgt.pos.clone();
+  tgtFrom = controls.target.clone();
+  tgtTo = tgt.tgt.clone();
+  tween = 0;
+  document.querySelectorAll('.nav-btn').forEach((b, k) => b.classList.toggle('active', k===i));
+  renderInfo(i);
+}
+
+groups[0].visible = true;
+renderInfo(0);
+
+document.getElementById('nav').addEventListener('click', e => {
+  const btn = e.target.closest('.nav-btn');
+  if(!btn) return;
+  switchScene(parseInt(btn.dataset.scene,10));
+});
+window.addEventListener('keydown', e => {
+  if(e.key >= '1' && e.key <= '5') switchScene(parseInt(e.key,10)-1);
+});
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  composer.setSize(window.innerWidth, window.innerHeight);
+});
+
+const clock = new THREE.Clock();
+function loop(){
+  requestAnimationFrame(loop);
+  const dt = clock.getDelta();
+  const t = clock.getElapsedTime();
+
+  if(tween < 1){
+    tween = Math.min(1, tween + dt*0.9);
+    const k = 1 - Math.pow(1-tween, 3);
+    camera.position.lerpVectors(camFrom, camTo, k);
+    controls.target.lerpVectors(tgtFrom, tgtTo, k);
+  }
+
+  stars.rotation.y += dt * 0.012;
+  stars.rotation.x += dt * 0.006;
+
+  const g = groups[activeIndex];
+  if(g && g.userData.tick) g.userData.tick(t);
+
+  controls.update();
+  composer.render();
+}
+loop();
+
+window.addEventListener('load', () => setTimeout(() => document.getElementById('loader').classList.add('hidden'), 500));
+</script>
+</body>
+</html>
